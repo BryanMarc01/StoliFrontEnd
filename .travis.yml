@@ -2,7 +2,9 @@ dist: bionic
 language: node_js
 node_js: '16'
 
-sudo: required
+services:
+  - docker
+
 branches:
   only:
     - main
@@ -10,22 +12,36 @@ branches:
 jobs:
   include:
     - stage: Build
-      name: 'Run Build'
+      name: 'Build Frontend Docker Image'
       script:
-        - npm run build
+        - docker build -t $DOCKER_USERNAME/frontend:latest .
+        - docker images  # Listar imágenes para depuración
+      after_script:
+        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+        - docker tag $DOCKER_USERNAME/frontend:latest $DOCKER_USERNAME/frontend:build
+        - docker push $DOCKER_USERNAME/frontend:build
 
     - stage: Test
-      name: 'Run Tests'
+      name: 'Run Frontend Tests'
       script:
-        - npm test
+        - docker pull $DOCKER_USERNAME/frontend:build
+        - docker tag $DOCKER_USERNAME/frontend:build $DOCKER_USERNAME/frontend:test
+        - docker images  # Listar imágenes para depuración
+        - docker run $DOCKER_USERNAME/frontend:test
 
-    - stage: FrontEnd Deployment
-      name: 'Run FrontEnd Deployment'
+    - stage: Deploy
+      name: 'Deploy Frontend Docker Image'
       script:
-        - echo "Deploy now!"
+        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+        - docker pull $DOCKER_USERNAME/frontend:build
+        - docker tag $DOCKER_USERNAME/frontend:build $DOCKER_USERNAME/frontend:latest
+        - docker images  # Listar imágenes antes del push
+        - docker push $DOCKER_USERNAME/frontend:latest
 
-      deploy:
-        on:
-          branch: main
+stages:
+  - name: Build
+  - name: Test
+  - name: Deploy
 
-      if: type = push
+before_deploy:
+  - echo "Starting deployment"
