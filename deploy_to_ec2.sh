@@ -21,4 +21,4 @@ ssh -o StrictHostKeyChecking=no -i $PEM_KEY_PATH $SERVER_USER@$SERVER_IP << EOF
   docker run -d --name frontend -p 3000:3000 public.ecr.aws/d3s5l7i0/frontend:latest
 EOF
 
-echo "Despliegue completado exitosamente."
+echo "Despliegue completado exitosamente"
