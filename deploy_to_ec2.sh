@@ -3,11 +3,17 @@
 # Asegúrate de que el script se detenga si ocurre algún error
 set -e
 
+export PATH="/snap/bin:/usr/bin:$PATH"
+echo "DEBUG: PATH is $PATH"
+which aws
+which docker
 # Variables de configuración
 SERVER_USER="ubuntu"
 SERVER_IP="3.141.189.187"
 PEM_KEY_PATH="/tmp/deploy_key.pem"
 ECR_REPOSITORY_URI="public.ecr.aws/d3s5l7i0/frontend"
+
+
 
 # Inicia sesión en Docker y actualiza los contenedores
 ssh -o StrictHostKeyChecking=no -i $PEM_KEY_PATH $SERVER_USER@$SERVER_IP << EOF
