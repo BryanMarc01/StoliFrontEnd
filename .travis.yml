@@ -19,9 +19,9 @@ before_install:
   - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
   - aws configure set default.region $AWS_REGION
   - aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
-  - openssl enc -d -aes-256-cbc -K $ENCRYPTED_KEY -iv $ENCRYPTED_IV -in ~/.ssh/stoli.pem.enc -out /tmp/deploy_key.pem
+  - openssl enc -d -aes-256-cbc -K $ENCRYPTED_KEY -iv $ENCRYPTED_IV -in stoli.pem.enc -out /tmp/deploy_key.pem
   - chmod 600 /tmp/deploy_key.pem
-  - ls -l /tmp  # Lista los archivos en /tmp para verificar que deploy_key.pem esté presente
+  - ls -l /tmp  
 
 jobs:
   include:
@@ -42,7 +42,6 @@ jobs:
 
 stages:
   - name: Build
-  - name: Test
   - name: Deploy
 
 before_deploy:
