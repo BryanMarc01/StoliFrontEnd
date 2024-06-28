@@ -19,9 +19,9 @@ before_install:
   - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
   - aws configure set default.region $AWS_REGION
   - aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
-  - openssl enc -d -aes-256-cbc -K $ENCRYPTED_KEY -iv $ENCRYPTED_IV -in stoli.pem.enc -out /tmp/deploy_key.pem
+  - openssl aes-256-cbc -K $encrypted_<key>_key -iv $encrypted_<key>_iv -in stoli.pem.enc -out /tmp/deploy_key.pem -d
   - chmod 600 /tmp/deploy_key.pem
-  
+
 
 jobs:
   include:
@@ -33,7 +33,7 @@ jobs:
         - docker build -t frontend:latest .
         - docker tag frontend:latest public.ecr.aws/d3s5l7i0/frontend:latest
         - docker push public.ecr.aws/d3s5l7i0/frontend:latest
-
+        
     - stage: Deploy
       name: 'Deploy to EC2'
       script:
@@ -42,6 +42,7 @@ jobs:
 
 stages:
   - name: Build
+  - name: Test
   - name: Deploy
 
 before_deploy:
