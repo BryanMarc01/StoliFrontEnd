@@ -37,7 +37,7 @@ jobs:
     - stage: Deploy
       name: 'Deploy to EC2'
       script:
-        - ./deploy_to_ec2.sh
+        - bash deploy_to_ec2.sh
       if: branch = main
 
 stages:
