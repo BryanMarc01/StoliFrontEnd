@@ -14,7 +14,7 @@ ssh -o StrictHostKeyChecking=no -i $PEM_KEY_PATH $SERVER_USER@$SERVER_IP << EOF
   aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
   aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
   aws configure set default.region $AWS_REGION
-  aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/d3s5l7i0
+  aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
   docker pull public.ecr.aws/d3s5l7i0/frontend:latest
   docker stop frontend || true
   docker rm frontend || true
