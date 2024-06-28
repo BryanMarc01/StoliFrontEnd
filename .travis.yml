@@ -9,34 +9,29 @@ branches:
   only:
     - main
 
+before_install:
+  - echo "Logging in to AWS ECR"
+  - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+  - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+  - aws configure set default.region $AWS_REGION
+  - aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/d3s5l7i0
+
 jobs:
   include:
     - stage: Build
       name: 'Build Frontend Docker Image'
       script:
-        - docker build -t $DOCKER_USERNAME/frontend:latest .
-        - docker images  # Listar imágenes para depuración
-      after_script:
-        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-        - docker tag $DOCKER_USERNAME/frontend:latest $DOCKER_USERNAME/frontend:build
-        - docker push $DOCKER_USERNAME/frontend:build
-
-    - stage: Test
-      name: 'Run Frontend Tests'
-      script:
-        - docker pull $DOCKER_USERNAME/frontend:build
-        - docker tag $DOCKER_USERNAME/frontend:build $DOCKER_USERNAME/frontend:test
-        - docker images  # Listar imágenes para depuración
-        - docker run $DOCKER_USERNAME/frontend:test
-
+        - npm install
+        - npm test
+        - docker build -t frontend:latest .
+        - docker tag frontend:latest public.ecr.aws/d3s5l7i0/frontend:latest
+        - docker push public.ecr.aws/d3s5l7i0/frontend:latest
+        
     - stage: Deploy
-      name: 'Deploy Frontend Docker Image'
+      name: 'Deploy to EC2'
       script:
-        - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-        - docker pull $DOCKER_USERNAME/frontend:build
-        - docker tag $DOCKER_USERNAME/frontend:build $DOCKER_USERNAME/frontend:latest
-        - docker images  # Listar imágenes antes del push
-        - docker push $DOCKER_USERNAME/frontend:latest
+        - bash deploy_to_ec2.sh
+      if: branch = main
 
 stages:
   - name: Build
